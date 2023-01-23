@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/bg/logo.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="心无旁骛~">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本篇文章主要以北京市空气质量监测数据为例子，聚集数据建模中的数据预处理和基本分析环节，说明Numpy和Pandas的数据读取、数据分组、数据重编码、分类汇总等数据加工处理功能。同时在实现案例的过程中对用到的Numpy和Pandas相关函数进行讲解。  数据 在进行案例之前，我首先将本案例即将用到的数据集链接分享：北京市空气质量数据 大家可以进入文档中，将数据复制到你自己创建的Excel文件中，更">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Python机器学习数据建模与分析——Numpy和Pandas综合应用案例：空气质量监测数据的预处理和基本分析">
+<meta property="og:url" content="https://pytorchlover.github.io/example/index.html">
+<meta property="og:site_name" content="心无旁骛~ 的博客">
+<meta property="og:description" content="本篇文章主要以北京市空气质量监测数据为例子，聚集数据建模中的数据预处理和基本分析环节，说明Numpy和Pandas的数据读取、数据分组、数据重编码、分类汇总等数据加工处理功能。同时在实现案例的过程中对用到的Numpy和Pandas相关函数进行讲解。  数据 在进行案例之前，我首先将本案例即将用到的数据集链接分享：北京市空气质量数据 大家可以进入文档中，将数据复制到你自己创建的Excel文件中，更">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pytorchlover.github.io/img/data_module.png">
+<meta property="article:published_time" content="2023-01-21T11:33:42.000Z">
+<meta property="article:modified_time" content="2023-01-21T11:39:20.569Z">
+<meta property="article:author" content="心无旁骛~">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Data analysis">
+<meta property="article:tag" content="Data modeling">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pytorchlover.github.io/img/data_module.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Python机器学习数据建模与分析——Numpy和Pandas综合应用案例：空气质量监测数据的预处理和基本分析 - 心无旁骛~ 的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_3846514_kabxni94auf.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/bynotes/texiao/source/css/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/bynotes/texiao/source/css/gundongtiao.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pytorchlover.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>心无旁骛~ 的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives">
+                <i class="iconfont icon-books"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories">
+                <i class="iconfont icon-th-large"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-book"></i>
+                <span>文档</span>
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/">
+                    
+                    <span>主题博客</span>
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/docs/guide/">
+                    
+                    <span>配置指南</span>
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/docs/icon/">
+                    
+                    <span>图标用法</span>
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Python机器学习数据建模与分析——Numpy和Pandas综合应用案例：空气质量监测数据的预处理和基本分析"></span>
+          
+        </div>
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-x-md">
+        <div id="board"
+          >
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
+
+<article class="page-content">
+  <blockquote>
+<p>本篇文章主要以北京市空气质量监测数据为例子，聚集数据建模中的数据预处理和基本分析环节，说明Numpy和Pandas的数据读取、数据分组、数据重编码、分类汇总等数据加工处理功能。同时在实现案例的过程中对用到的Numpy和Pandas相关函数进行讲解。</p>
+</blockquote>
+<h1>数据</h1>
+<p>在进行案例之前，我首先将本案例即将用到的数据集链接分享：<a target="_blank" rel="noopener" href="https://kdocs.cn/l/crZwpOnTuY9T">北京市空气质量数据</a><br>
+大家可以进入文档中，将数据复制到你自己创建的Excel文件中，更改文件名为北京市空气质量数据。<br>
+<img src="https://img-blog.csdnimg.cn/b3c9e4f8d20b46c7a1e5683093b6181f.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p>数据含义解释：</p>
+<table>
+<thead>
+<tr>
+<th>数据名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>日期</td>
+<td>空气质量监测的日期</td>
+</tr>
+<tr>
+<td>AQI</td>
+<td>空气质量指数</td>
+</tr>
+<tr>
+<td>质量等级</td>
+<td>空气质量等级，判段污染程度</td>
+</tr>
+<tr>
+<td>PM2.5</td>
+<td>空气中细颗粒物的含量</td>
+</tr>
+<tr>
+<td>PM10</td>
+<td>空气中人体可吸入颗粒物的含量</td>
+</tr>
+<tr>
+<td>SO2</td>
+<td>空气中二氧化硫的含量</td>
+</tr>
+<tr>
+<td>CO</td>
+<td>空气中一氧化碳的含量</td>
+</tr>
+<tr>
+<td>NO2</td>
+<td>空气中二氧化氮的含量</td>
+</tr>
+<tr>
+<td>03</td>
+<td>空气中臭氧的含量</td>
+</tr>
+</tbody>
+</table>
+<h1>一、空气质量监测数据的预处理</h1>
+<p>数据预处理的目标如下：</p>
+<ul>
+<li>根据空气质量监测的日期，生成对应的季度标志变量。</li>
+<li>对空气质量指数AQI分组，获得对应的空气质量等级。<br>
+代码及运行结果如下所示：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><br><br>data=pd.read_excel(<span class="hljs-string">&#x27;北京市空气质量数据.xlsx&#x27;</span>)  <span class="hljs-comment"># 数据文件地址</span><br>data=data.replace(<span class="hljs-number">0</span>,np.NaN)<br>data[<span class="hljs-string">&#x27;年&#x27;</span>]=data[<span class="hljs-string">&#x27;日期&#x27;</span>].apply(<span class="hljs-keyword">lambda</span> x:x.year)<br>month=data[<span class="hljs-string">&#x27;日期&#x27;</span>].apply(<span class="hljs-keyword">lambda</span> x:x.month)<br>quarter_month=&#123;<span class="hljs-string">&#x27;1&#x27;</span>:<span class="hljs-string">&#x27;一季度&#x27;</span>,<span class="hljs-string">&#x27;2&#x27;</span>:<span class="hljs-string">&#x27;一季度&#x27;</span>,<span class="hljs-string">&#x27;3&#x27;</span>:<span class="hljs-string">&#x27;一季度&#x27;</span>,<br>               <span class="hljs-string">&#x27;4&#x27;</span>:<span class="hljs-string">&#x27;二季度&#x27;</span>,<span class="hljs-string">&#x27;5&#x27;</span>:<span class="hljs-string">&#x27;二季度&#x27;</span>,<span class="hljs-string">&#x27;6&#x27;</span>:<span class="hljs-string">&#x27;二季度&#x27;</span>,<br>               <span class="hljs-string">&#x27;7&#x27;</span>:<span class="hljs-string">&#x27;三季度&#x27;</span>,<span class="hljs-string">&#x27;8&#x27;</span>:<span class="hljs-string">&#x27;三季度&#x27;</span>,<span class="hljs-string">&#x27;9&#x27;</span>:<span class="hljs-string">&#x27;三季度&#x27;</span>,<br>              <span class="hljs-string">&#x27;10&#x27;</span>:<span class="hljs-string">&#x27;四季度&#x27;</span>,<span class="hljs-string">&#x27;11&#x27;</span>:<span class="hljs-string">&#x27;四季度&#x27;</span>,<span class="hljs-string">&#x27;12&#x27;</span>:<span class="hljs-string">&#x27;四季度&#x27;</span>&#125;<br>data[<span class="hljs-string">&#x27;季度&#x27;</span>]=month.<span class="hljs-built_in">map</span>(<span class="hljs-keyword">lambda</span> x:quarter_month[<span class="hljs-built_in">str</span>(x)])<br>bins=[<span class="hljs-number">0</span>,<span class="hljs-number">50</span>,<span class="hljs-number">100</span>,<span class="hljs-number">150</span>,<span class="hljs-number">200</span>,<span class="hljs-number">300</span>,<span class="hljs-number">1000</span>]<br>data[<span class="hljs-string">&#x27;等级&#x27;</span>]=pd.cut(data[<span class="hljs-string">&#x27;AQI&#x27;</span>],bins,labels=[<span class="hljs-string">&#x27;一级优&#x27;</span>,<span class="hljs-string">&#x27;二级良&#x27;</span>,<span class="hljs-string">&#x27;三级轻度污染&#x27;</span>,<span class="hljs-string">&#x27;四级中度污染&#x27;</span>,<span class="hljs-string">&#x27;五级重度污染&#x27;</span>,<span class="hljs-string">&#x27;六级严重污染&#x27;</span>])<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;对AQI的分组结果：\n&#123;0&#125;&#x27;</span>.<span class="hljs-built_in">format</span>(data[[<span class="hljs-string">&#x27;日期&#x27;</span>,<span class="hljs-string">&#x27;AQI&#x27;</span>,<span class="hljs-string">&#x27;等级&#x27;</span>,<span class="hljs-string">&#x27;季度&#x27;</span>]]))<br><br><span class="hljs-comment"># 运行结果如下：</span><br>对AQI的分组结果：<br>             日期    AQI      等级   季度<br><span class="hljs-number">0</span>    <span class="hljs-number">2014</span>-01-01   <span class="hljs-number">81.0</span>     二级良  一季度<br><span class="hljs-number">1</span>    <span class="hljs-number">2014</span>-01-02  <span class="hljs-number">145.0</span>  三级轻度污染  一季度<br><span class="hljs-number">2</span>    <span class="hljs-number">2014</span>-01-03   <span class="hljs-number">74.0</span>     二级良  一季度<br><span class="hljs-number">3</span>    <span class="hljs-number">2014</span>-01-04  <span class="hljs-number">149.0</span>  三级轻度污染  一季度<br><span class="hljs-number">4</span>    <span class="hljs-number">2014</span>-01-05  <span class="hljs-number">119.0</span>  三级轻度污染  一季度<br><span class="hljs-meta">... </span>        ...    ...     ...  ...<br><span class="hljs-number">2150</span> <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">22</span>  <span class="hljs-number">183.0</span>  四级中度污染  四季度<br><span class="hljs-number">2151</span> <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">23</span>  <span class="hljs-number">175.0</span>  四级中度污染  四季度<br><span class="hljs-number">2152</span> <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">24</span>   <span class="hljs-number">30.0</span>     一级优  四季度<br><span class="hljs-number">2153</span> <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">25</span>   <span class="hljs-number">40.0</span>     一级优  四季度<br><span class="hljs-number">2154</span> <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">26</span>   <span class="hljs-number">73.0</span>     二级良  四季度<br><br>[<span class="hljs-number">2155</span> rows x <span class="hljs-number">4</span> columns]<br></code></pre></td></tr></table></figure>
+<p><strong>代码说明：</strong><br>
+（1）第6行：利用数据框函数replace()将数据框中的0（表示无监测结果）替换为缺失值NaN。<br>
+（2）第7，8行：利用.apply()方法以及匿名函数，基于“日期”变量得到每个样本观测的年份和月份。<br>
+（3）第9-12行：建立一个关于月份和季度的字典quarter_month。<br>
+（4）第13行：利用Python函数map()，依据字典quarter_month，将序列month中的1，2，3等月份映射（对应）到相应的季度上。<br>
+（5）第14行：生成一个后续用于对AQI分组的列表bins。它描述了AQI和空气质量等级的数值对应关系。<br>
+（6）第15行：利用Pandas的cut()方法对AQI进行分组。</p>
+<h2 id="二、上例中所用到的函数讲解">二、上例中所用到的函数讲解</h2>
+<h3 id="2-1-lambda表达式">2.1 lambda表达式</h3>
+<p><strong>介绍：</strong><br>
+Lambda 表达式是一个匿名函数，Lambda表达式基于数学中的λ演算得名，直接对应于其中的lambda抽象，是一个匿名函数，即没有函数名的函数。Lambda表达式可以表示闭包。<br>
+<img src="https://img-blog.csdnimg.cn/9eb2ed18e93541eaa26323fcc5232fd7.png#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python">double1 = <span class="hljs-keyword">lambda</span> x:<span class="hljs-number">2</span>*x<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;lambda表达式的输出：&quot;</span>,double1(<span class="hljs-number">2</span>))<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">double2</span>(<span class="hljs-params">x</span>):<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>*x<br><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;double2函数的输出&quot;</span>,double2(<span class="hljs-number">2</span>))<br><span class="hljs-comment"># 输出结果如下：</span><br><span class="hljs-keyword">lambda</span>表达式的输出： <span class="hljs-number">4</span><br>double2函数的输出 <span class="hljs-number">4</span><br></code></pre></td></tr></table></figure>
+<p>详细可参考博客:<a target="_blank" rel="noopener" href="http://t.csdn.cn/gMS4p">python的lambda表达式详细讲解</a></p>
+<h3 id="2-2-apply-函数">2.2 apply()函数</h3>
+<p><strong>介绍：</strong><br>
+<strong>apply</strong>函数是<strong>pandas</strong>里面所有函数中自由度最高的函数。该函数如下：</p>
+<blockquote>
+<p>*DataFrame.apply(func, axis=0, broadcast=False, raw=False, reduce=None,args=(), *<em>kwds)</em></p>
+</blockquote>
+<p>该函数最有用的是第一个参数，这个参数是函数，相当于C/C++的函数指针。<br>
+这个函数需要自己实现，函数的传入参数根据axis来定，比如axis = 1，就会把一行数据作为Series的数据 结构传入给自己实现的函数中，我们在函数中实现对Series不同属性之间的计算，返回一个结果，则apply函数 会自动遍历每一行DataFrame的数据，最后将所有结果组合成一个Series数据结构并返回。<br>
+<strong>说太多概念性的东西可能不太理解，这里直接上样例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><br><br>data=pd.read_excel(<span class="hljs-string">&#x27;E:\python机器学习数据建模与分析\数据\北京市空气质量数据.xlsx&#x27;</span>)<br><span class="hljs-built_in">print</span>(data[<span class="hljs-string">&#x27;日期&#x27;</span>])<br>data[<span class="hljs-string">&#x27;年&#x27;</span>]=data[<span class="hljs-string">&#x27;日期&#x27;</span>].apply(<span class="hljs-keyword">lambda</span> x:x.year)<br><span class="hljs-built_in">print</span>(data[<span class="hljs-string">&#x27;年&#x27;</span>])<br><br><span class="hljs-comment"># 输出结果如下：</span><br><span class="hljs-number">0</span>      <span class="hljs-number">2014</span>-01-01<br><span class="hljs-number">1</span>      <span class="hljs-number">2014</span>-01-02<br><span class="hljs-number">2</span>      <span class="hljs-number">2014</span>-01-03<br><span class="hljs-number">3</span>      <span class="hljs-number">2014</span>-01-04<br><span class="hljs-number">4</span>      <span class="hljs-number">2014</span>-01-05<br>          ...    <br><span class="hljs-number">2150</span>   <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">22</span><br><span class="hljs-number">2151</span>   <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">23</span><br><span class="hljs-number">2152</span>   <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">24</span><br><span class="hljs-number">2153</span>   <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">25</span><br><span class="hljs-number">2154</span>   <span class="hljs-number">2019</span>-<span class="hljs-number">11</span>-<span class="hljs-number">26</span><br>Name: 日期, Length: <span class="hljs-number">2155</span>, dtype: datetime64[ns]<br><span class="hljs-number">0</span>       <span class="hljs-number">2014</span><br><span class="hljs-number">1</span>       <span class="hljs-number">2014</span><br><span class="hljs-number">2</span>       <span class="hljs-number">2014</span><br><span class="hljs-number">3</span>       <span class="hljs-number">2014</span><br><span class="hljs-number">4</span>       <span class="hljs-number">2014</span><br>        ... <br><span class="hljs-number">2150</span>    <span class="hljs-number">2019</span><br><span class="hljs-number">2151</span>    <span class="hljs-number">2019</span><br><span class="hljs-number">2152</span>    <span class="hljs-number">2019</span><br><span class="hljs-number">2153</span>    <span class="hljs-number">2019</span><br><span class="hljs-number">2154</span>    <span class="hljs-number">2019</span><br>Name: 年, Length: <span class="hljs-number">2155</span>, dtype: int64<br><br></code></pre></td></tr></table></figure>
+<p>通过输出结果我们其实可以看出，我们使用apply函数可以将日期中的年份提取出来。<br>
+想要更加详细了解可以看这篇博客：<a target="_blank" rel="noopener" href="http://t.csdn.cn/HmwaQ">python中apply函数</a></p>
+<h3 id="2-3-map函数">2.3 map函数</h3>
+<p><strong>介绍：</strong><br>
+map函数是 Python 内置的高阶函数，在Python3.0版本中，它接收一个函数 f 和一个 list，并通过把函数 f 依次作用在 list 的每个元素上，返回一个list的<strong>可迭代对象</strong>。如果想得到一个list列表，则用list（map()）进行强制转换。</p>
+<blockquote>
+<p><em>map(function, iterable)</em></p>
+</blockquote>
+<ul>
+<li>function – 函数</li>
+<li>iterable – 序列</li>
+</ul>
+<p>map函数的第一个参数是一个函数，第二个参数是一个序列，里面的每个元素作为函数的参数进行计算和判断。函数返回值则被作为新的元素存储起来。</p>
+<p><strong>示例：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">x</span>):<br>    <span class="hljs-keyword">return</span> x**<span class="hljs-number">2</span>			<span class="hljs-comment">#计算x的平方</span><br><br>lists = <span class="hljs-built_in">range</span>(<span class="hljs-number">11</span>)       <span class="hljs-comment">#创建包含 0-10 的列表</span><br>a = <span class="hljs-built_in">map</span>(add,lists)      <span class="hljs-comment">#计算 0-10 的平方，并映射</span><br><span class="hljs-built_in">print</span>(a)                <span class="hljs-comment"># 返回一个迭代器：&lt;map object at 0x0000025574F68F70&gt;</span><br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">list</span>(a))          <span class="hljs-comment"># 使用 list() 转换为列表。</span><br><span class="hljs-comment"># 结果为：[0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100]</span><br><br><br><span class="hljs-comment"># 使用lambda匿名函数的形式复现上面的代码会更简洁一些</span><br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">list</span>(<span class="hljs-built_in">map</span>(<span class="hljs-keyword">lambda</span> x:x**<span class="hljs-number">2</span>,<span class="hljs-built_in">range</span>(<span class="hljs-number">11</span>))))   <br><span class="hljs-comment"># 结果为：[0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100]</span><br></code></pre></td></tr></table></figure>
+<h3 id="2-4-cut函数">2.4 cut函数</h3>
+<p>在对数据进行分段分组时，可采用cut方法，用bins的方式实现。这种情况一般使用于，对于年龄、分数等数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> random<br><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">from</span> pandas <span class="hljs-keyword">import</span> Series,DataFrame<br><span class="hljs-comment">#用随机数产生一个二维数组。分别是年龄的性别。</span><br>df=pd.DataFrame(&#123;<span class="hljs-string">&#x27;Age&#x27;</span>:np.random.randint(<span class="hljs-number">0</span>,<span class="hljs-number">70</span>,<span class="hljs-number">100</span>),<br>                <span class="hljs-string">&#x27;Sex&#x27;</span>:np.random.choice([<span class="hljs-string">&#x27;M&#x27;</span>,<span class="hljs-string">&#x27;F&#x27;</span>],<span class="hljs-number">100</span>),<br>                &#125;)<br><span class="hljs-comment">#用cut函数对于年龄进行分段分组，用bins来对年龄进行分段，左开右闭</span><br>age_groups=pd.cut(df[<span class="hljs-string">&#x27;Age&#x27;</span>],bins=[<span class="hljs-number">0</span>,<span class="hljs-number">18</span>,<span class="hljs-number">35</span>,<span class="hljs-number">55</span>,<span class="hljs-number">70</span>,<span class="hljs-number">100</span>])<br><span class="hljs-comment"># print(age_groups)</span><br><span class="hljs-built_in">print</span>(df.groupby(age_groups).count())<br><br><span class="hljs-comment"># 结果如下所示：</span><br>           Age  Sex<br>Age                <br>(<span class="hljs-number">0</span>, <span class="hljs-number">18</span>]     <span class="hljs-number">23</span>   <span class="hljs-number">23</span><br>(<span class="hljs-number">18</span>, <span class="hljs-number">35</span>]    <span class="hljs-number">23</span>   <span class="hljs-number">23</span><br>(<span class="hljs-number">35</span>, <span class="hljs-number">55</span>]    <span class="hljs-number">31</span>   <span class="hljs-number">31</span><br>(<span class="hljs-number">55</span>, <span class="hljs-number">70</span>]    <span class="hljs-number">20</span>   <span class="hljs-number">20</span><br>(<span class="hljs-number">70</span>, <span class="hljs-number">100</span>]    <span class="hljs-number">0</span>    <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+<p>cut()方法主要用于对<font color="ff0000">连续数据分组</font>，也称对连续数据进行离散化处理。在上面的例子中，我们使用cut()，依照分组标准（即列表bins）对变量AQI进行分组并给出分组标签。即：AQI在区间$(0, 50]$的为一组，组标签为“一级优”，在区间$(50,100]$的为一组，组标签为“二级良”，等等以此类推。<font color="ff0000">生成的“等级”与变量（与数据集中原有的“质量等级”一致）为分类型（有顺序的）变量。</font></p>
+<h3 id="补充解释DataFrame函数：">补充解释DataFrame函数：</h3>
+<p>DataFrame是一个类似于<font color="#dd0000">二维数组</font>或<font color="#dd0000">表格（如excel）</font>的对象，它每列的数据都可以是不同的数据类型。</p>
+<p><strong>注意：</strong><br>
+DataFrame的索引不仅有行索引，还有列索引，数据可以有多列<br>
+<img src="https://img-blog.csdnimg.cn/6bc3d36085064764ad98c42206e555e7.png#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<p><strong>创建方式：</strong><br>
+Pandas的DataFrame类对象的原型如下（仅作了解）：</p>
+<blockquote>
+<p><em>pandas.DataFrame（data = None,index = None,columns = None,dtype = None,copy = False ）</em></p>
+</blockquote>
+<p>index：表示行标签。若不设置该参数，则默认会自动创建一个从0~N的整数索引。<br>
+columns：列标签<br>
+<strong>举个例子：</strong><br>
+通过传入数组来创建DataFrame类对象</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><br><span class="hljs-comment"># 创建数组</span><br>demo_arr = np.array([[<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span>],<br>                     [<span class="hljs-string">&#x27;d&#x27;</span>, <span class="hljs-string">&#x27;e&#x27;</span>, <span class="hljs-string">&#x27;f&#x27;</span>]])<br><span class="hljs-comment"># 基于数组创建DataFrame对象</span><br>df_obj = pd.DataFrame(demo_arr)<br><span class="hljs-built_in">print</span>(df_obj)<br><br><span class="hljs-comment"># 输出结果如下：</span><br>   <span class="hljs-number">0</span>  <span class="hljs-number">1</span>  <span class="hljs-number">2</span><br><span class="hljs-number">0</span>  a  b  c<br><span class="hljs-number">1</span>  d  e  f<br><br></code></pre></td></tr></table></figure>
+<p>在创建DataFrame类对象时，如果为其指定了<font color="0000ddd">列索引</font>，则DataFrame的列会按照指定索引的顺序进行排列，比如指定列索引No1,No2, No3的顺序：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><br><span class="hljs-comment"># 创建数组</span><br>demo_arr = np.array([[<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span>],<br>                     [<span class="hljs-string">&#x27;d&#x27;</span>, <span class="hljs-string">&#x27;e&#x27;</span>, <span class="hljs-string">&#x27;f&#x27;</span>]])<br><span class="hljs-comment"># 基于数组创建DataFrame对象</span><br>df_obj = pd.DataFrame(demo_arr, columns=[<span class="hljs-string">&#x27;No1&#x27;</span>, <span class="hljs-string">&#x27;No2&#x27;</span>, <span class="hljs-string">&#x27;No3&#x27;</span>])<br><span class="hljs-built_in">print</span>(df_obj)<br><br><span class="hljs-comment"># 输出结果如下：</span><br>  No1 No2 No3<br><span class="hljs-number">0</span>   a   b   c<br><span class="hljs-number">1</span>   d   e   f<br></code></pre></td></tr></table></figure>
+<p>详细了解请看博客：<a target="_blank" rel="noopener" href="https://edu.csdn.net/skill/python02/python-3-204?category=883&amp;typeId=17520#2_Series_14">Pandas数据结构–Series、DataFrame详解</a></p>
+<h1>三、空气质量监测数据的基本分析</h1>
+<p>在上面的基础上，我们利用Pandas的数据分类汇总和列联表编制等功能，对空气监测数据进行基本分析。基本分析的目标如下：</p>
+<ul>
+<li>计算各季度AQI和PM2.5的平均值等描述统计量。</li>
+<li>找到空气质量较差的若干天的数据，以及各季度中空气质量较差的若干天的数据。</li>
+<li>计算季度和空气质量等级的交叉列联表。</li>
+<li>派生空气质量等级的虚拟变量。</li>
+<li>数据集的抽样。</li>
+</ul>
+<h3 id="3-1-基本统计描述">3.1 基本统计描述</h3>
+<p><strong>以下代码利用Pandas实现以上前三个目标：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;各季度AQI和PM2.5的均值:\n&#123;0&#125;&#x27;</span>.<span class="hljs-built_in">format</span>(data.loc[:,[<span class="hljs-string">&#x27;AQI&#x27;</span>,<span class="hljs-string">&#x27;PM2.5&#x27;</span>]].groupby(data[<span class="hljs-string">&#x27;季度&#x27;</span>]).mean()))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;各季度AQI和PM2.5的描述统计量:\n&#x27;</span>,data.groupby(data[<span class="hljs-string">&#x27;季度&#x27;</span>])[<span class="hljs-string">&#x27;AQI&#x27;</span>,<span class="hljs-string">&#x27;PM2.5&#x27;</span>].apply(<span class="hljs-keyword">lambda</span> x:x.describe()))<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">top</span>(<span class="hljs-params">df,n=<span class="hljs-number">10</span>,column=<span class="hljs-string">&#x27;AQI&#x27;</span></span>):<br>    <span class="hljs-keyword">return</span> df.sort_values(by=column,ascending=<span class="hljs-literal">False</span>)[:n] <span class="hljs-comment"># 对AQI列的数据进行降序排列，然后返回前n个（这里n=10）</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;空气质量最差的5天:\n&#x27;</span>,top(data,n=<span class="hljs-number">5</span>)[[<span class="hljs-string">&#x27;日期&#x27;</span>,<span class="hljs-string">&#x27;AQI&#x27;</span>,<span class="hljs-string">&#x27;PM2.5&#x27;</span>,<span class="hljs-string">&#x27;等级&#x27;</span>]])<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;各季度空气质量最差的3天:\n&#x27;</span>,data.groupby(data[<span class="hljs-string">&#x27;季度&#x27;</span>]).apply(<span class="hljs-keyword">lambda</span> x:top(x,n=<span class="hljs-number">3</span>)[[<span class="hljs-string">&#x27;日期&#x27;</span>,<span class="hljs-string">&#x27;AQI&#x27;</span>,<span class="hljs-string">&#x27;PM2.5&#x27;</span>,<span class="hljs-string">&#x27;等级&#x27;</span>]]))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;各季度空气质量情况:\n&#x27;</span>,pd.crosstab(data[<span class="hljs-string">&#x27;等级&#x27;</span>],data[<span class="hljs-string">&#x27;季度&#x27;</span>],margins=<span class="hljs-literal">True</span>,margins_name=<span class="hljs-string">&#x27;总计&#x27;</span>,normalize=<span class="hljs-literal">False</span>))<br><br></code></pre></td></tr></table></figure>
+<p>输出结果如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/6e2423fe8fa6436ab6d66de1c34e187a.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>代码说明：</strong><br>
+（1）第1行：利用数据框的groupby()方法，计算各季度AQI和PM2.5的平均值。<font color="000ff">groupby()方法是将数据按指定变量进行分组，可以对分组结果进一步计算均值等。</font><br>
+（2）第2行：计算几个季度AQI和PM2.5的基本描述统计量（均值，标准差，最小值，四分位数，最大值）。<font color="000ff">这里将groupby、apply以及lambda表达式集中在一起使用。首先，将数据按照季度分组；然后，对分组后的AQI和PM2.5，分别根据lambda表达式指定的处理步骤处理（计算基本描述统计量）。</font><br>
+（3）第4，5行：定义了一个名为top的用户自定义函数：对给定数据框，按指定列（默认AQI列）值的降序排序，返回排在前n（默认10）条数据。<br>
+（4）第6行：调用用户自定义函数top，对data数据框中，按AQI值的降序排序并返回前5条数据，即AQI最高的5天的数据。<br>
+（5）第7行：首先对数据按季度分组，依次对分组数据调用用户自定义函数top，得到各季度AQI最高的3天数据。<br>
+（6）第8行：利用Pandas函数crosstab()对数据按季度和空气质量等级交叉分组，并给出各个组的样本量。<br>
+ 例如，在2014年1月至2019年11月之间的2149天中，空气质量为严重污的天数为46天，集中分布在第一和第四季的冬天供暖季，分别是21天和23天。<br>
+ crosstab()函数可以方便地编制两个分类变量的列联表。列联表单元格可以是频数，也可以是百分比，还可指定是否添加行列合计等。</p>
+<h3 id="3-2-groupby函数">3.2 groupby函数</h3>
+<p><img src="https://img-blog.csdnimg.cn/f153bcf67f8a4a73b0507cfe460eacfb.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+pandas对象支持的groupby()方法语法格式如下：</p>
+<blockquote>
+<p><em>groupby(by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False)</em></p>
+</blockquote>
+<ul>
+<li>参数by用于指定分组依据，可以是函数、字典、Series对象、DataFrame对象的列名等；</li>
+<li>参数axis表示分组轴的方向，可以是0或’index’，1或’columns’，默认值为0；</li>
+<li>参数level表示如果某个轴是一个MultiIndex对象（层级索引），则按照特定级别或多个级别分组；</li>
+<li>参数as_index=False表示用来分组的列中的数据不作为结果DataFrame对象的index；</li>
+<li>参数sort指定是否对分组标签进行排序，默认值为True。</li>
+</ul>
+<p><strong>使用groupby()方法可以实现两种分组方式，返回的对象结果不同。如果仅对DataFrame对象中的数据进行分组，将返回一个DataFrameGroupBy对象；如果是对DataFrame对象中某一列数据进行分组，将返回一个SeriesGroupBy对象。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 按列名对列分组</span><br>obj1 = data[<span class="hljs-string">&#x27;Country&#x27;</span>].groupby(data[<span class="hljs-string">&#x27;Region&#x27;</span>])<br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">type</span>(obj1))<br><br><span class="hljs-comment"># out</span><br>&lt;<span class="hljs-keyword">class</span><span class="hljs-string">&#x27;pandas.core.groupby.generic.SeriesGroupBy’&gt;</span><br><span class="hljs-string"></span><br><span class="hljs-string"># 按列名对数据分组</span><br><span class="hljs-string">obj2 = data.groupby(data[&#x27;</span>Region<span class="hljs-string">&#x27;])</span><br><span class="hljs-string">print(type(obj2))</span><br><span class="hljs-string"># out</span><br><span class="hljs-string">&lt;class&#x27;</span>pandas.core.groupby.generic.DataFrameGroupBy<span class="hljs-string">&#x27;&gt;</span><br></code></pre></td></tr></table></figure>
+<p>可以使用groupby(‘label’)方法按照单列分组，也可以使用groupby(‘label1’,‘label2’)方法按照多列分组，返回一个GroupBy对象。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">data.groupby(<span class="hljs-string">&#x27;Region&#x27;</span>)<span class="hljs-comment"># 按单列分组</span><br><span class="hljs-comment"># out：&lt;pandas.core.groupby.generic.DataFrameGroupByobject at 0x7f0aee73e850&gt;</span><br>data.groupby([<span class="hljs-string">&#x27;Region&#x27;</span>, <span class="hljs-string">&#x27;Country&#x27;</span>])<span class="hljs-comment"># 按多列分组</span><br><span class="hljs-comment"># out：&lt;pandas.core.groupby.generic.DataFrameGroupByobject at 0x7f0aedeb99d0&gt;</span><br></code></pre></td></tr></table></figure>
+<p><font color="fff0000">使用数据分组的groupby()方法返回一个GroupBy对象，此时并未真正进行计算，只是保存了数据分组的中间结果。</font></p>
+<h3 id="3-3-派生虚拟自变量">3.3 派生虚拟自变量</h3>
+<p>这里，利用Pandas派生空气质量等级的虚拟变量。<br>
+<font color="000fff">虚拟变量也称作哑变量，是统计学处理分类型数据的一种常用方式。对具有K个类别的分类型变量X，也可以生成K个变量如$X_1,X_2,…,X_K$,且每个变量仅有0和1两种取值。这些变量称为分类型变量的虚拟变量。其中，1表示属于某个类别，0表示不属于某个类别，和True和False含义差不多。</font></p>
+<p>虚拟变量在数据预测建模中将起到非常重要的作用。Pandas生成虚拟变量的实现如下所示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">pd.get_dummies(data[<span class="hljs-string">&#x27;等级&#x27;</span>])<br>data.join(pd.get_dummies(data[<span class="hljs-string">&#x27;等级&#x27;</span>]))<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/e4d8d1946ac94be5946a004fc0740cfd.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>代码说明：</strong><br>
+（1）第1行：利用Pandas的get_dummies得到分类型变量“等级”的哑变量。<br>
+ 例如：数据中的“等级”是包含6个类别的分类型变量。相应的6个虚拟变量依次表示：是否为一级优，是否为二级良等等。如2014年1月1日的等级为二级良，所以后面二级良的哑变量为1，其它的相应为0。<br>
+（2）第2行：利用数据框的join()方法，将原始数据和哑变量数据，按行索引进行横向合并。<br>
+ 使用join()方法进行数据的横向合并的时候，要确保两分数据的样本观测在行索引上是一一对应的，否则会出现“张冠李戴”，也就是哑变量的取值和实际不符。</p>
+<h3 id="3-4-数据集的抽样">3.4 数据集的抽样</h3>
+<p>数据集的抽样在数据建模中极其普遍，因此掌握Numpy的抽样实现方式是非常必要的。以下利用Numpy对空气质量监测数据进行了两种策略的抽样：一种是简单随机抽样；另一种是依条件抽样。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 简单随机抽样</span><br>np.random.seed(<span class="hljs-number">123</span>)<br>sampler=np.random.randint(<span class="hljs-number">0</span>,<span class="hljs-built_in">len</span>(data),<span class="hljs-number">10</span>)<br><span class="hljs-built_in">print</span>(sampler)<br>sampler=np.random.permutation(<span class="hljs-built_in">len</span>(data))[:<span class="hljs-number">10</span>]<br><span class="hljs-built_in">print</span>(sampler)<br><span class="hljs-comment"># 条件抽样</span><br>data.take(sampler)<br>data.loc[data[<span class="hljs-string">&#x27;质量等级&#x27;</span>]==<span class="hljs-string">&#x27;优&#x27;</span>,:]<br></code></pre></td></tr></table></figure>
+<p>简单随机抽样的结果如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">[<span class="hljs-number">1346</span> <span class="hljs-number">1122</span> <span class="hljs-number">1766</span> <span class="hljs-number">2154</span> <span class="hljs-number">1147</span> <span class="hljs-number">1593</span> <span class="hljs-number">1761</span>   <span class="hljs-number">96</span>   <span class="hljs-number">47</span>   <span class="hljs-number">73</span>]<br>[<span class="hljs-number">1883</span>  <span class="hljs-number">326</span>   <span class="hljs-number">43</span> <span class="hljs-number">1627</span> <span class="hljs-number">1750</span> <span class="hljs-number">1440</span>  <span class="hljs-number">993</span> <span class="hljs-number">1469</span> <span class="hljs-number">1892</span>  <span class="hljs-number">865</span>]<br></code></pre></td></tr></table></figure>
+<p>条件抽样的结果如下：<br>
+<img src="https://img-blog.csdnimg.cn/0f51d764900340f2a11f339581b26919.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>代码说明：</strong><br>
+（1）第3行：利用Pandas函数random.randint()在指定范围内随机抽取指定个数（这里是10）的随机数。<br>
+（2）第 5行：利用Pandas函数random.permutation是对数据随机打乱重排。之后再抽取前10个样本观测。<br>
+（3）第8行：利用数据框的take()方法，基于指定随机数获得数据集的一个子集。<br>
+（4）第9行：利用数据框访问的方式，抽取满足指定条件（质量等级等于优）行的数据。</p>
+<h1>四、Matplotlib的综合应用：空气质量监测数据的图形化展示</h1>
+<p><font color="#A0B0E0">Matplotlib是Python中最常用的绘图模块</font>，其主要特点如下：<br>
+（1）Matplotlib的Pyplot子模块与MATLAB非常相似，可以方便地绘制各种常见的统计图形，是用户进行探索式数据分析的重要工具。<br>
+（2）可以通过各种函数设置图形的图标题、线条样式、字符形状、颜色、轴属性以及字体属性等等。<br>
+<strong>以下我们就用Matplotlib子模块Pyplot的强大功能基于空气质量监测数据进行画图。</strong></p>
+<h3 id="4-1-AQI的时序变化特点">4.1 AQI的时序变化特点</h3>
+<p><strong>以下代码利用Matplotlib的线图展示2014年至2019年每日AQI的时序变化特点（运行环境选取jupyter notebook）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt<br><br>%matplotlib inline<br>plt.rcParams[<span class="hljs-string">&#x27;font.sans-serif&#x27;</span>]=[<span class="hljs-string">&#x27;SimHei&#x27;</span>]  <span class="hljs-comment">#解决中文显示乱码问题</span><br>plt.rcParams[<span class="hljs-string">&#x27;axes.unicode_minus&#x27;</span>]=<span class="hljs-literal">False</span><br><br>data=pd.read_excel(<span class="hljs-string">&#x27;E:\python机器学习数据建模与分析\数据\北京市空气质量数据.xlsx&#x27;</span>)<br>data=data.replace(<span class="hljs-number">0</span>,np.NaN)   <span class="hljs-comment"># 将缺失值用0代替</span><br><br>plt.figure(figsize=(<span class="hljs-number">10</span>,<span class="hljs-number">5</span>))<br>plt.plot(data[<span class="hljs-string">&#x27;AQI&#x27;</span>],color=<span class="hljs-string">&#x27;black&#x27;</span>,linestyle=<span class="hljs-string">&#x27;-&#x27;</span>,linewidth=<span class="hljs-number">0.5</span>)<br>plt.axhline(y=data[<span class="hljs-string">&#x27;AQI&#x27;</span>].mean(),color=<span class="hljs-string">&#x27;red&#x27;</span>, linestyle=<span class="hljs-string">&#x27;-&#x27;</span>,linewidth=<span class="hljs-number">0.5</span>,label=<span class="hljs-string">&#x27;AQI总平均值&#x27;</span>)<br>data[<span class="hljs-string">&#x27;年&#x27;</span>]=data[<span class="hljs-string">&#x27;日期&#x27;</span>].apply(<span class="hljs-keyword">lambda</span> x:x.year)<br>AQI_mean=data[<span class="hljs-string">&#x27;AQI&#x27;</span>].groupby(data[<span class="hljs-string">&#x27;年&#x27;</span>]).mean().values<br>year=[<span class="hljs-string">&#x27;2014年&#x27;</span>,<span class="hljs-string">&#x27;2015年&#x27;</span>,<span class="hljs-string">&#x27;2016年&#x27;</span>,<span class="hljs-string">&#x27;2017年&#x27;</span>,<span class="hljs-string">&#x27;2018年&#x27;</span>,<span class="hljs-string">&#x27;2019年&#x27;</span>]<br>col=[<span class="hljs-string">&#x27;red&#x27;</span>,<span class="hljs-string">&#x27;blue&#x27;</span>,<span class="hljs-string">&#x27;green&#x27;</span>,<span class="hljs-string">&#x27;yellow&#x27;</span>,<span class="hljs-string">&#x27;purple&#x27;</span>,<span class="hljs-string">&#x27;brown&#x27;</span>]<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">6</span>):<br>    plt.axhline(y=AQI_mean[i],color=col[i], linestyle=<span class="hljs-string">&#x27;--&#x27;</span>,linewidth=<span class="hljs-number">0.5</span>,label=year[i])<br>plt.title(<span class="hljs-string">&#x27;2014年至2019年AQI时间序列折线图&#x27;</span>)<br>plt.xlabel(<span class="hljs-string">&#x27;年份&#x27;</span>)<br>plt.ylabel(<span class="hljs-string">&#x27;AQI&#x27;</span>)<br>plt.xlim(xmax=<span class="hljs-built_in">len</span>(data), xmin=<span class="hljs-number">1</span>)<br>plt.ylim(ymax=data[<span class="hljs-string">&#x27;AQI&#x27;</span>].<span class="hljs-built_in">max</span>(),ymin=<span class="hljs-number">1</span>)<br>plt.yticks([data[<span class="hljs-string">&#x27;AQI&#x27;</span>].mean()],[<span class="hljs-string">&#x27;AQI平均值&#x27;</span>])<br>plt.xticks([<span class="hljs-number">1</span>,<span class="hljs-number">365</span>,<span class="hljs-number">365</span>*<span class="hljs-number">2</span>,<span class="hljs-number">365</span>*<span class="hljs-number">3</span>,<span class="hljs-number">365</span>*<span class="hljs-number">4</span>,<span class="hljs-number">365</span>*<span class="hljs-number">5</span>],[<span class="hljs-string">&#x27;2014&#x27;</span>,<span class="hljs-string">&#x27;2015&#x27;</span>,<span class="hljs-string">&#x27;2016&#x27;</span>,<span class="hljs-string">&#x27;2017&#x27;</span>,<span class="hljs-string">&#x27;2018&#x27;</span>,<span class="hljs-string">&#x27;2019&#x27;</span>])<br>plt.legend(loc=<span class="hljs-string">&#x27;best&#x27;</span>)<br>plt.text(x=<span class="hljs-built_in">list</span>(data[<span class="hljs-string">&#x27;AQI&#x27;</span>]).index(data[<span class="hljs-string">&#x27;AQI&#x27;</span>].<span class="hljs-built_in">max</span>()),y=data[<span class="hljs-string">&#x27;AQI&#x27;</span>].<span class="hljs-built_in">max</span>()-<span class="hljs-number">20</span>,s=<span class="hljs-string">&#x27;空气质量最差日&#x27;</span>,color=<span class="hljs-string">&#x27;red&#x27;</span>)<br>plt.show()<br></code></pre></td></tr></table></figure>
+<p>运行结果如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/093a352e699a474e9007c936537634d2.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>代码说明：</strong><br>
+（1）第3行：Matplotlib的Pyplot子模块，指定别名为plt。<br>
+（2）第5至7行：指定立即显示所绘图形，且通过参数设置解决图形中文显示乱码问题。<br>
+（3）第12行：利用函数plt.figure说明图形的一般特征，如这里宽为10高5。<br>
+（4）第13行：利用函数plt.plot绘制序列折线图（还可以绘制其他图）。同时，指定折线颜色、线形、线宽等。<br>
+（5）第14行：利用函数plt.axhline在参数y指定的位置上画一条平行于横坐标的直线，并给定直线图例文字。plt.axvline可参数x指定的位置上画一条平行于纵坐标的直线。<br>
+（6）第16至20行：首先，分组计算各年AQI的平均值；然后，通过for循环绘制多条平行于横坐标的直线，表征各年AQI平均值。<br>
+（7）第21至23行：利用title()、xlabel()、ylabel()指定图的标题，横纵坐标的坐标标签。<br>
+（8）第24，25行：利用xlim()、ylim()指定横纵坐标的取值范围。<br>
+（9）第26，27行：利用xticks()、yticks()在指定坐标刻度位置上给出刻度标签。<br>
+（10）第28行：利用legend()在指定位置（这里best表示最优位置）显示图例。<br>
+（11）第29行：利用text()在指定的行列位置上显示指定文字<br>
+（12）第30行：利用show()表示本次绘图结束。</p>
+<h3 id="4-2-AQI的分布特征及相关性分析">4.2 AQI的分布特征及相关性分析</h3>
+<p><strong>下面将利用Matplotlib，对空气质量监测数据做如下图形化展示：</strong></p>
+<ul>
+<li>利用线图展示2014年到2019年的年均AQI的变化特点。</li>
+<li>利用直方图展示2014年到2019年AQI的整体分布特征。</li>
+<li>利用散点图展示AQI和PM2.5的相关性。</li>
+<li>利用饼图展示空气质量等级的分布特征。</li>
+</ul>
+<p><strong>具体代码如下：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> warnings<br>warnings.filterwarnings(action = <span class="hljs-string">&#x27;ignore&#x27;</span>)<br>plt.figure(figsize=(<span class="hljs-number">10</span>,<span class="hljs-number">5</span>))<br>plt.subplot(<span class="hljs-number">2</span>,<span class="hljs-number">2</span>,<span class="hljs-number">1</span>)<br>plt.plot(AQI_mean,color=<span class="hljs-string">&#x27;black&#x27;</span>,linestyle=<span class="hljs-string">&#x27;-&#x27;</span>,linewidth=<span class="hljs-number">0.5</span>)<br>plt.title(<span class="hljs-string">&#x27;各年AQI均值折线图&#x27;</span>)<br>plt.xticks([<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>],[<span class="hljs-string">&#x27;2014&#x27;</span>,<span class="hljs-string">&#x27;2015&#x27;</span>,<span class="hljs-string">&#x27;2016&#x27;</span>,<span class="hljs-string">&#x27;2017&#x27;</span>,<span class="hljs-string">&#x27;2018&#x27;</span>,<span class="hljs-string">&#x27;2019&#x27;</span>])<br>plt.subplot(<span class="hljs-number">2</span>,<span class="hljs-number">2</span>,<span class="hljs-number">2</span>)<br>plt.hist(data[<span class="hljs-string">&#x27;AQI&#x27;</span>],bins=<span class="hljs-number">20</span>)<br>plt.title(<span class="hljs-string">&#x27;AQI直方图&#x27;</span>)<br>plt.subplot(<span class="hljs-number">2</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>)<br>plt.scatter(data[<span class="hljs-string">&#x27;PM2.5&#x27;</span>],data[<span class="hljs-string">&#x27;AQI&#x27;</span>],s=<span class="hljs-number">0.5</span>,c=<span class="hljs-string">&#x27;green&#x27;</span>,marker=<span class="hljs-string">&#x27;.&#x27;</span>)<br>plt.title(<span class="hljs-string">&#x27;PM2.5与AQI散点图&#x27;</span>)<br>plt.xlabel(<span class="hljs-string">&#x27;PM2.5&#x27;</span>)<br>plt.ylabel(<span class="hljs-string">&#x27;AQI&#x27;</span>)<br>plt.subplot(<span class="hljs-number">2</span>,<span class="hljs-number">2</span>,<span class="hljs-number">4</span>)<br>tmp=pd.value_counts(data[<span class="hljs-string">&#x27;质量等级&#x27;</span>],sort=<span class="hljs-literal">False</span>)  <span class="hljs-comment">#等同：tmp=data[&#x27;质量等级&#x27;].value_counts()</span><br>share=tmp/<span class="hljs-built_in">sum</span>(tmp)<br>labels=tmp.index<br>explode = [<span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,<span class="hljs-number">0.2</span>,<span class="hljs-number">0</span>]<br>plt.pie(share, explode = explode,labels = labels, autopct = <span class="hljs-string">&#x27;%3.1f%%&#x27;</span>,startangle = <span class="hljs-number">180</span>, shadow = <span class="hljs-literal">True</span>)<br>plt.title(<span class="hljs-string">&#x27;空气质量整体情况的饼图&#x27;</span>)<br></code></pre></td></tr></table></figure>
+<p>结果如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/b33dd28104cd4e6dbc52d16b07cc78db.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>代码说明：</strong><br>
+（1）第1，2行：导入warnings模块，并指定忽略代码运行过程中的警告信息。<br>
+（2）第4行：subplot(2,2,1)表示将绘图区域分成2行2列4个单元，且下一副图将在第1个单元显示。<br>
+（3）第8行：subplot(2,2,2)表示将绘图区域分成2行2列4个单元，且下一副图将在第2个单元显示。<br>
+（4）第9行：利用hist()绘制AQI的直方图，图中包含20个柱形条，即将数据分成20组。<br>
+（5）第12行：利用scatter()绘制PM2.5和AQI的散点图。并指定点的大小（s），颜色（c）和形状（marker）。<br>
+（6）第21行：利用pie()绘制饼图。<br>
+ <font color="000ff">绘制饼图之前，需事先计算饼图各个组成部分的占比，距离饼图中心位置的距离（那些组成部分需要拉出来突出显示）、标签等，以及第一个组成部分排放的起始位置等。</font></p>
+<h3 id="4-3-优化空气质量状况的统计图形">4.3 优化空气质量状况的统计图形</h3>
+<p>由<strong>于上图中四幅画出现了重叠现象，为此可采取以下方式对图形进行优化调整。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python">fig,axes=plt.subplots(nrows=<span class="hljs-number">2</span>,ncols=<span class="hljs-number">2</span>,figsize=(<span class="hljs-number">10</span>,<span class="hljs-number">5</span>))<br>axes[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>].plot(AQI_mean,color=<span class="hljs-string">&#x27;black&#x27;</span>,linestyle=<span class="hljs-string">&#x27;-&#x27;</span>,linewidth=<span class="hljs-number">0.5</span>)<br>axes[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&#x27;各年AQI均值折线图&#x27;</span>)<br>axes[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>].set_xticks([<span class="hljs-number">0</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>])<br>axes[<span class="hljs-number">0</span>,<span class="hljs-number">0</span>].set_xticklabels([<span class="hljs-string">&#x27;2014&#x27;</span>,<span class="hljs-string">&#x27;2015&#x27;</span>,<span class="hljs-string">&#x27;2016&#x27;</span>,<span class="hljs-string">&#x27;2017&#x27;</span>,<span class="hljs-string">&#x27;2018&#x27;</span>,<span class="hljs-string">&#x27;2019&#x27;</span>])<br>axes[<span class="hljs-number">0</span>,<span class="hljs-number">1</span>].hist(data[<span class="hljs-string">&#x27;AQI&#x27;</span>],bins=<span class="hljs-number">20</span>)<br>axes[<span class="hljs-number">0</span>,<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&#x27;AQI直方图&#x27;</span>)<br>axes[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>].scatter(data[<span class="hljs-string">&#x27;PM2.5&#x27;</span>],data[<span class="hljs-string">&#x27;AQI&#x27;</span>],s=<span class="hljs-number">0.5</span>,c=<span class="hljs-string">&#x27;green&#x27;</span>,marker=<span class="hljs-string">&#x27;.&#x27;</span>)<br>axes[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>].set_title(<span class="hljs-string">&#x27;PM2.5与AQI散点图&#x27;</span>)<br>axes[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&#x27;PM2.5&#x27;</span>)<br>axes[<span class="hljs-number">1</span>,<span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&#x27;AQI&#x27;</span>)<br>axes[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>].pie(share, explode = explode,labels = labels, autopct = <span class="hljs-string">&#x27;%3.1f%%&#x27;</span>,startangle = <span class="hljs-number">180</span>, shadow = <span class="hljs-literal">True</span>)<br>axes[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>].set_title(<span class="hljs-string">&#x27;空气质量整体情况的饼图&#x27;</span>)<br>fig.subplots_adjust(hspace=<span class="hljs-number">0.5</span>)<br>fig.subplots_adjust(wspace=<span class="hljs-number">0.5</span>)<br></code></pre></td></tr></table></figure>
+<p>结果如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/cc1522eb77454885b9a9d1e996d4aa93.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+由于饼图中的“无”比例分配不太清晰，所以单独重画一下：<br>
+<img src="https://img-blog.csdnimg.cn/e472d9380c984315be5eee1c4edfd679.png#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+<strong>代码说明：</strong><br>
+（1）第1行：说明绘图区域的宽和高，并指定将绘图区域分成2行2列4个单元。结果将赋值给fig和axes对象。可通过fig对整个图的特征进行设置，axes对应各个单元格对象。<br>
+（2）通过图形单元索引的方式指定绘图单元。例如：axes[0,0]表示第1行第1列的单元格。<br>
+（3）单元格对象的图标题、坐标轴标签、坐标刻度等，需采用set_title()、set_xlabel()、set_ylabel()、set_xticks()、set_xticklabels()设置。<br>
+（3）第14，15行：利用subplots_adjust调整各图形单元行或列之间的距离。</p>
+<h1>总结</h1>
+<p>Python作为一款面向对象、跨平台并且开源的计算机语言，是机器学习实践的首选工具。入门Python机器学习应从了解并掌握Python的Numpy、Pandas、Matplotlib包开始。学习Python和完成机器学习实践的有效途径是：以特定的机器学习应用场景和数据作为出发点，沿着由浅入深的数据分析脉络，以逐个解决数据分析实际问题为目标，逐步展开对Python的学习和机器学习的实践。</p>
+<blockquote>
+<p>📢博客主页：<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_63007797?spm=1011.2415.3001.5343">https://blog.csdn.net/m0_63007797?spm=1011.2415.3001.5343</a><br>
+📢欢迎点赞 👍 收藏 ⭐留言 📝 如有错误敬请指正！<br>
+📢本文由 心无旁骛~ 原创，首发于 CSDN博客🙉<br>
+📢停下休息的时候不要忘了别人还在奔跑，希望大家抓紧时间学习，全力奔赴更美好的生活✨</p>
+</blockquote>
+
+
+  
+
+</article>
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/love.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/xiaoxingxing.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/xiaoxuehua.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,906 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/bg/logo.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="心无旁骛~">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本章内容  [ ] k-近邻分类算法 [ ] 从文本文件中解析数据  前言 众所周知，电影可以按照题材分类，然而题材本身是如何定义的?由谁来判定某部电影属于哪个题材?也就是说同一题材的电影具有哪些公共特征?这些都是在进行电影分类时必须要考虑的问题。没有哪个电影人会说自己制作的电影和以前的某部电影类似,但我们确实知道每部电影在风格上的确有可能会和同题材的电影相近。那么动作片具有哪些共有特征，使得动作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习基础——k-近邻算法概述和简单实现">
+<meta property="og:url" content="https://pytorchlover.github.io/2023/01/20/hello-world/index.html">
+<meta property="og:site_name" content="心无旁骛~ 的博客">
+<meta property="og:description" content="本章内容  [ ] k-近邻分类算法 [ ] 从文本文件中解析数据  前言 众所周知，电影可以按照题材分类，然而题材本身是如何定义的?由谁来判定某部电影属于哪个题材?也就是说同一题材的电影具有哪些公共特征?这些都是在进行电影分类时必须要考虑的问题。没有哪个电影人会说自己制作的电影和以前的某部电影类似,但我们确实知道每部电影在风格上的确有可能会和同题材的电影相近。那么动作片具有哪些共有特征，使得动作">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pytorchlover.github.io/img/kNN.png">
+<meta property="article:published_time" content="2023-01-20T08:22:00.000Z">
+<meta property="article:modified_time" content="2023-01-20T08:34:23.746Z">
+<meta property="article:author" content="心无旁骛~">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Arithmetic">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pytorchlover.github.io/img/kNN.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>机器学习基础——k-近邻算法概述和简单实现 - 心无旁骛~ 的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_3846514_kabxni94auf.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/bynotes/texiao/source/css/shubiao.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/gh/bynotes/texiao/source/css/gundongtiao.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"pytorchlover.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>心无旁骛~ 的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives">
+                <i class="iconfont icon-books"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories">
+                <i class="iconfont icon-th-large"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" target="_self" href="javascript:;" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="iconfont icon-book"></i>
+                <span>文档</span>
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/">
+                    
+                    <span>主题博客</span>
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/docs/guide/">
+                    
+                    <span>配置指南</span>
+                  </a>
+                
+                  
+                  
+                  
+                  <a class="dropdown-item" target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/docs/icon/">
+                    
+                    <span>图标用法</span>
+                  </a>
+                
+              </div>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="机器学习基础——k-近邻算法概述和简单实现"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        心无旁骛~
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-01-20 16:22" pubdate>
+           2023 年 01 月 20 日 , 下午 04:22 , 星期五
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          42 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">机器学习基础——k-近邻算法概述和简单实现</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><strong>本章内容</strong></p>
+<ul>
+<li>[ ] k-近邻分类算法</li>
+<li>[ ] 从文本文件中解析数据</li>
+</ul>
+<h1>前言</h1>
+<p>众所周知，电影可以按照题材分类，然而题材本身是如何定义的?由谁来判定某部电影属于哪个题材?也就是说同一题材的电影具有哪些公共特征?这些都是在进行电影分类时必须要考虑的问题。没有哪个电影人会说自己制作的电影和以前的某部电影类似,但我们确实知道每部电影在风格上的确有可能会和同题材的电影相近。那么动作片具有哪些共有特征，使得动作片之间非常类似,而与爱情片存在着明显的差别呢?动作片中也会存在接吻镜头,爱情片中也会存在打斗场景,我们不能单纯依靠是否存在打斗或者亲吻来判断影片的类型。但是爱情片中的亲吻镜头更多,动作片中的打斗场景也更频繁，基于此类场景在某部电影中出现的次数可以用来进行电影分类。本章第—节基于电影中出现的亲吻、打斗出现的次数，使用k-近邻算法构造程序，自动划分电影的题材类型。我们首先使用电影分类讲解k-近邻算法的基本概念，然后学习如何在其他系统上使用k-近邻算法。<br>
+本章介绍第一个机器学习算法:k-近邻算法，它非常有效而且易于掌握。首先，我们将探讨k-近邻算法的基本理论，以及如何使用距离测量的方法分类物品;其次我们将使用Python从文本文件中导人并解析数据。</p>
+<h1>1 k-近邻算法概述</h1>
+<p>简单地说，k-近邻算法采用测量不同特征值之间的距离方法进行分类。</p>
+<p><strong>优点：精度高、对异常值不敏感、无数据输入假定。<br>
+缺点：计算复杂度高、空间复杂度高。<br>
+适用数据范围：数值型和标称型。</strong><br>
+k-近邻算法（kNN）的==工作原理==是：存在一个样本数据集合，也称作训练样本集，并且样本集中每个数据都存在标签，即我们知道样本集中每一条数据与所属分类的对应关系。输入没有标签的新数据后，将新数据的每个特征与样本集中数据对应的特征进行比较，然后算法提取样本集中特征最相似数据（最近邻）的分类标签。一般来说，我们只选择样本数据集中前k个最相似的数据，这就是k-近邻算法中k的出处，通常k是不大于20的整数。最后，选择k个最相似数据中出现次数最多的分类标签，作为新数据的分类。<br>
+现在我们回到前面电影分类的例子，使用k-近邻算法分类爱情片和动作片。有人曾经统计过很多电影的打斗镜头和接吻镜头，图2-1显示了6部电影的打斗和接吻镜头数。假如有一部未看过的电影，如何确定它是爱情片还是动作片呢?我们可以使用kNN来解决这个问题。<br>
+<img src="https://img-blog.csdnimg.cn/e70a581d7bd14f348e0615ebd5a8c847.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+首先我们需要知道这个未知电影存在多少个打斗镜头和接吻镜头，图2-1中问号位置是该未知电影出现的镜头数图形化展示，具体数字参见表2-1。<br>
+<img src="https://img-blog.csdnimg.cn/0771ba159826491385713bd199284313.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+即使不知道未知电影属于哪种类型，我们也可以通过某种方法计算出来。首先计算未知电影与样本集中其他电影的距离，如表2-2所示。此处暂时不要关心如何计算得到这些距离值，使用Python实现电影分类应用时，会提供具体的计算方法。<br>
+<img src="https://img-blog.csdnimg.cn/adaf69e708064c029cdd8cbe94563ea2.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+现在我们得到了样本集中所有电影与未知电影的距离，按照距离递增排序，可以找到k个距离最近的电影。假定k=3，则三个最靠近的电影依次是He 's Not Really into Dudes、Beautiful Woman和California Man。k-近邻算法按照距离最近的三部电影的类型，决定未知电影的类型，而这三部电影全是爱情片，因此我们判定未知电影是爱情片。<br>
+本章主要讲解如何在实际环境中应用k-近邻算法，同时涉及如何使用Python工具和相关的机器学习术语。按照开发机器学习应用的通用步骤，我们使用Python语言开发k-近邻算法的简单应用，以检验算法使用的正确性。</p>
+<p><strong>k-近邻算法的一半流程：</strong><br>
+（1）收集数据：可以使用任何方法。<br>
+（2）准备数据：距离计算所需要的数值，最好是结构化的数据格式。<br>
+（3）分析数据：可以使用任何方法。<br>
+（4）训练算法：此步骤不适用与k-近邻算法。<br>
+（5）测试算法：计算错误率。<br>
+（6）使用算法：首先需要输入样本数据和结构化的输出结果，然后运行k-近邻算法判定输入数据分别属于哪个分类，最后应用对计算出的分类执行后续的处理。</p>
+<h3 id="1-1-准备-使用python导入数据">1.1 准备: 使用python导入数据</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> operator<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">createDataSet</span>():<br>    group = np.array([[<span class="hljs-number">1.0</span>, <span class="hljs-number">1.1</span>], [<span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>]])<br>    labels = [<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>]<br>    <span class="hljs-keyword">return</span> group, labels<br></code></pre></td></tr></table></figure>
+<p>在上面的代码中，我们导入了两个模块，第一个是科学计算包Numpy，第二个是运算符模块。k-近邻算法执行排序操作的时候会用到operator运算符模块提供的函数，后面我们将进一步介绍。<br>
+打开python编译器，本文用pycharm进行编译示范。用group和labels变量接收createDataset()函数的两个返回值并输出。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python">group, labels = createDataSet()<br><span class="hljs-built_in">print</span>(group)<br><span class="hljs-built_in">print</span>(labels)<br><span class="hljs-comment"># 输出如下:</span><br>[[<span class="hljs-number">1.</span>  <span class="hljs-number">1.1</span>]<br> [<span class="hljs-number">1.</span>  <span class="hljs-number">1.</span> ]<br> [<span class="hljs-number">0.</span>  <span class="hljs-number">0.</span> ]<br> [<span class="hljs-number">0.</span>  <span class="hljs-number">0.1</span>]]<br>[<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>]<br></code></pre></td></tr></table></figure>
+<p>group输出的结果里面有4组数据，每组数据有两个我们已知的属性或者特征值。上面的group矩阵每行包含一个不同的数据，我们可以把它想象为某个日志文件中不同的测量点或者入口。由于人脑的限制，我们通常只能可视化处理三维以下的事务。因此为了简单地实现数据可视化，对于每个数据点我们通常只使用两个特征。<br>
+向量label包含了每个数据点的标签信息，label包含的元素个数等于group矩阵行数。这里我们将数据点(1，1.1)定义为类A，数据点(0,0.1)定义为类B。为了说明方便，例子中的数值是任意选择的，并没有给出轴标签，图2-2是带有类标签信息的四个数据点。<br>
+<img src="https://img-blog.csdnimg.cn/8b888bad2c254defa1544bcde6ce2159.png#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+现在我们已经知道Python如何解析数据，如何加载数据，以及kNN算法的工作原理，接下来我们将使用这些方法完成分类任务。</p>
+<h3 id="1-2-从文本文件中解析数据">1.2 从文本文件中解析数据</h3>
+<p>这里首先给出k-近邻算法的伪代码和实际的python代码，然后详细地解释每行代码的含义。其伪代码如下：<br>
+对未知类别属性的数据集中的每个点依次执行以下操作：<br>
+（1）计算已知类别数据集中的点与当前未知类别数据集中点之间的距离。<br>
+（2）按照距离递增次序排序。<br>
+（3）选取与当前点距离最小的k个点。<br>
+（4）确定前k个点所在类别的出现频率，按从小到大的排列返回索引列表。<br>
+（5）返回前k个点出现频率最高的类别作为当前点的预测分类。<br>
+<strong>python函数classify0（）如程序清单2-1所示</strong><br>
+<img src="https://img-blog.csdnimg.cn/4a2d78298e67447e9efb90f7f40129de.png" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"><br>
+classify0()函数有4个输人参数:用于分类的输人向量是inX,输入的训练样本集为dataSet,标签向量为labels，最后的参数k表示用于选择最近邻居的数目，其中标签向量的元素数目和矩阵dataset的行数相同。<br>
+程序清单2-1使用欧氏距离公式，计算两个向量点xA和xB之间的距离①:</p>
+<p>$$<br>
+d= \sqrt{（xA_0-xB_0）^2+(xA_1-xB_1)^2}<br>
+$$<br>
+例如，点(0, 0)与(1,2)之间的距离计算为:<br>
+$$<br>
+\sqrt{(1-0)^2+(2-0)^2}<br>
+$$<br>
+如果数据集存在4个特征值，则点(1,0,0,1)与(7,6,9,4)之间的距离计算为:<br>
+$$<br>
+\sqrt{(7-1)^2+(6-0)^2+（9-1)^2+(4-1)^2}<br>
+$$<br>
+计算完所有点之间的距离后，可以对数据按照从小到大的次序排序。然后，确定前k个距离最小元素所在的主要分类2，输入k总是正整数;最后，将classCount字典分解为元组列表，然后使用程序第二行导人运算符模块的itemgetter方法,按照第二个元素的次序对元组进行排序③。·此处的排序为逆序，即按照从最大到最小次序排序，最后返回发生频率最高的元素标签。<br>
+<strong>完整代码如下：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> operator<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">createDataSet</span>():<br>    group = np.array([[<span class="hljs-number">1.0</span>, <span class="hljs-number">1.1</span>], [<span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>]])<br>    labels = [<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>]<br>    <span class="hljs-keyword">return</span> group, labels<br>group, labels = createDataSet()<br><span class="hljs-built_in">print</span>(group)<br><span class="hljs-built_in">print</span>(labels)<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">classify0</span>(<span class="hljs-params">inX, dataSet, labels, k</span>):<br>    dataSetSize = dataSet.shape[<span class="hljs-number">0</span>]<br>    <span class="hljs-comment"># 距离计算</span><br>    diffMat = np.tile(inX, (dataSetSize, <span class="hljs-number">1</span>)) - dataSet<br>    sqDiffMat = diffMat ** <span class="hljs-number">2</span><br>    <span class="hljs-built_in">print</span>(sqDiffMat)<br>    sqDistances = sqDiffMat.<span class="hljs-built_in">sum</span>(axis=<span class="hljs-number">1</span>)  <span class="hljs-comment"># 沿着1维降维，即把列全部压缩，只剩下一列，保留所有行</span><br>    <span class="hljs-built_in">print</span>(sqDistances)<br>    distances = sqDistances**<span class="hljs-number">0.5</span><br>    <span class="hljs-built_in">print</span>(distances)<br>    sortedDistIndicies = distances.argsort()     <span class="hljs-comment"># 返回数组值从小到大的索引值</span><br>    <span class="hljs-built_in">print</span>(sortedDistIndicies)<br>    classCount = &#123;&#125;<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(k):<br>        voteIlabel = labels[sortedDistIndicies[i]]<br>        <span class="hljs-built_in">print</span>(sortedDistIndicies[i])<br>        <span class="hljs-built_in">print</span>(voteIlabel)<br>        classCount[voteIlabel] = classCount.get(voteIlabel, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span><br>    <span class="hljs-built_in">print</span>(classCount)<br>    <span class="hljs-built_in">print</span>(classCount.items())<br>    sortedClassCount = <span class="hljs-built_in">sorted</span>(classCount.items(), key=operator.itemgetter(<span class="hljs-number">1</span>), reverse=<span class="hljs-literal">True</span>)  <span class="hljs-comment"># python3.x以上的版本中，iteritems()方法已经被删除，items()函数替代了它的功能，可以for循环遍历</span><br>    <span class="hljs-built_in">print</span>(sortedClassCount)           <span class="hljs-comment"># key = operator.itemgetter(1),指的是按照dict_items([(&#x27;B&#x27;, 2), (&#x27;A&#x27;, 1)])中后一个元素进行排序，即2和1，如果是0的话就是按照B和A排序</span><br>    <span class="hljs-keyword">return</span> sortedClassCount[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]     <span class="hljs-comment"># reverse=True指的是降序，即按照从大到小，返回[0][0]获取最大标签出现次数的标签，也就是B</span><br><br><br><span class="hljs-built_in">print</span>(classify0([<span class="hljs-number">0</span>, <span class="hljs-number">0</span>], group, labels, <span class="hljs-number">3</span>))<br><span class="hljs-comment"># 输出结果</span><br><span class="hljs-comment"># group矩阵</span><br>[[<span class="hljs-number">1.</span>  <span class="hljs-number">1.1</span>]<br> [<span class="hljs-number">1.</span>  <span class="hljs-number">1.</span> ]<br> [<span class="hljs-number">0.</span>  <span class="hljs-number">0.</span> ]<br> [<span class="hljs-number">0.</span>  <span class="hljs-number">0.1</span>]]<br> <span class="hljs-comment"># labels标签列表</span><br>[<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-string">&#x27;B&#x27;</span>]<br>[[<span class="hljs-number">1.</span>   <span class="hljs-number">1.21</span>]<br> [<span class="hljs-number">1.</span>   <span class="hljs-number">1.</span>  ]<br> [<span class="hljs-number">0.</span>   <span class="hljs-number">0.</span>  ]<br> [<span class="hljs-number">0.</span>   <span class="hljs-number">0.01</span>]]<br>[<span class="hljs-number">2.21</span> <span class="hljs-number">2.</span>   <span class="hljs-number">0.</span>   <span class="hljs-number">0.01</span>]<br>[<span class="hljs-number">1.48660687</span> <span class="hljs-number">1.41421356</span> <span class="hljs-number">0.</span>         <span class="hljs-number">0.1</span>       ]<br><span class="hljs-comment"># 从小到大的索引</span><br>[<span class="hljs-number">2</span> <span class="hljs-number">3</span> <span class="hljs-number">1</span> <span class="hljs-number">0</span>]<br><span class="hljs-number">2</span><br>B<br><span class="hljs-number">3</span><br>B<br><span class="hljs-number">1</span><br>A<br><span class="hljs-comment"># classCount的内容</span><br>&#123;<span class="hljs-string">&#x27;B&#x27;</span>: <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;A&#x27;</span>: <span class="hljs-number">1</span>&#125;<br><span class="hljs-comment"># 使用items返回字典内容为列表</span><br>dict_items([(<span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-number">1</span>)])<br><span class="hljs-comment"># 使用itemgetter对第二个元素也就是数字2和1进行从大到小排序后的结果。</span><br>[(<span class="hljs-string">&#x27;B&#x27;</span>, <span class="hljs-number">2</span>), (<span class="hljs-string">&#x27;A&#x27;</span>, <span class="hljs-number">1</span>)]<br><span class="hljs-comment"># 输出最终结果，也就是标签次数出现最多的结果B</span><br>B<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" class="category-chain-item">机器学习</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Machine-Learning/">#Machine Learning</a>
+      
+        <a href="/tags/Arithmetic/">#Arithmetic</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>机器学习基础——k-近邻算法概述和简单实现</div>
+      <div>https://pytorchlover.github.io/2023/01/20/hello-world/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>心无旁骛~</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年1月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/01/21/text1/" title="Python机器学习数据建模与分析——Numpy和Pandas综合应用案例：空气质量监测数据的预处理和基本分析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Python机器学习数据建模与分析——Numpy和Pandas综合应用案例：空气质量监测数据的预处理和基本分析</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"YbAN9LTPZpjK7jr9uPlfplPH-gzGzoHsz","appKey":"FzABUf0ajXB9cSgjBOgWbdPd","path":"window.location.pathname","placeholder":"留言仅限讨论，禁止广告等行为","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://yban9ltp.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/love.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/xiaoxingxing.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/xiaoxuehua.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
